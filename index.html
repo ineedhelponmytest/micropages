@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MicroPages — Feed & Editor</title>
+<title>MicroPages</title>
 <style>
   body{margin:0;font-family:sans-serif;background:#0f1115;color:#e6eef7;}
   header{padding:12px;background:#10121a;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;}
@@ -17,6 +17,7 @@
   textarea, input{width:100%;margin:4px 0;padding:6px;background:#0f1115;border:1px solid #222;color:#e6eef7;border-radius:4px;font-family:monospace;}
   .fullscreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0f1115;color:#e6eef7;z-index:1000;overflow:auto;padding:12px;display:none;flex-direction:column;}
   .fullscreen button{align-self:flex-end;}
+  #debugLog{position:fixed;bottom:0;left:0;width:100%;max-height:120px;overflow:auto;background:#222;color:#fff;font-size:12px;padding:4px;z-index:999;}
 </style>
 </head>
 <body>
@@ -48,15 +49,24 @@
   <div id="fullscreenContent"></div>
 </div>
 
+<!-- Debug log -->
+<div id="debugLog"></div>
+
 <!-- Supabase UMD -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 
 <script>
   const SUPABASE_URL = 'https://jzeoinetgtxfrulujraa.supabase.co';
   const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZW9pbmV0Z3R4ZnJ1bHVqcmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MTcxNzAsImV4cCI6MjA4MDk5MzE3MH0.Z0By2zuzpCWqNbH0YIT0vliseXFe1LlRSHsT2dSu4Hs';
-  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // DOM Elements
+  const log = (msg) => {
+    console.log(msg);
+    const dbg = document.getElementById('debugLog');
+    dbg.innerHTML += msg + '<br>';
+    dbg.scrollTop = dbg.scrollHeight;
+  };
+
   const homeBtn = document.getElementById('homeBtn');
   const editorBtn = document.getElementById('editorBtn');
   const feedScreen = document.getElementById('feedScreen');
@@ -75,8 +85,9 @@
 
   // Load feed
   async function loadFeed(){
-    const { data, error } = await supabase.from('pages').select('*').order('created_at',{ascending:false});
-    if(error){ console.error('Supabase Error:', error); return; }
+    log('Loading feed...');
+    const { data, error } = await supabaseClient.from('pages').select('*').order('created_at',{ascending:false});
+    if(error){ log('Supabase Error: ' + error.message); return; }
     feedList.innerHTML = '';
     data.forEach(page=>{
       const div = document.createElement('div');
@@ -104,12 +115,13 @@
       };
       // Like button
       div.querySelector('.likeBtn').onclick = async ()=>{
-        const { error } = await supabase.from('pages').update({likes: (page.likes||0)+1}).eq('id', page.id);
-        if(error){ console.error('Supabase Like Error:', error); return; }
+        const { error } = await supabaseClient.from('pages').update({likes: (page.likes||0)+1}).eq('id', page.id);
+        if(error){ log('Supabase Like Error: ' + error.message); return; }
         loadFeed();
       };
       feedList.appendChild(div);
     });
+    log('Feed loaded.');
   }
 
   // Close fullscreen
@@ -117,13 +129,15 @@
 
   // Create page
   createBtn.onclick = async ()=>{
+    log('Create button pressed');
     if(!titleInput.value){ alert('Enter a title'); return; }
     if(!htmlContent.value){ alert('Enter HTML content'); return; }
-    const { data, error } = await supabase.from('pages').insert([{
+    const { data, error } = await supabaseClient.from('pages').insert([{
       title: titleInput.value,
       content: { html: htmlContent.value },
       likes:0
     }]);
+    log('Insert result: ' + JSON.stringify({data, error}));
     if(error){ alert('Supabase Create Error: ' + error.message); return; }
     titleInput.value='';
     htmlContent.value='';
@@ -131,7 +145,6 @@
     loadFeed();
   };
 
-  // Initialize
   loadFeed();
 </script>
 </body>
