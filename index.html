@@ -3,21 +3,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MicroPages</title>
+<title>MicroPages — Feed & Comments</title>
+
+<!-- Playful font -->
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+
 <style>
-  body{margin:0;font-family:sans-serif;background:#0f1115;color:#e6eef7;}
-  header{padding:12px;background:#10121a;border-bottom:1px solid #222;display:flex;justify-content:space-between;align-items:center;}
-  button{padding:6px 12px;border:none;border-radius:4px;background:#24c77b;color:#0b0c0f;cursor:pointer;}
-  .screen{display:none;height:calc(100vh - 48px);overflow:auto;padding:12px;}
+  body{
+    margin:0;
+    font-family:'Comic Neue', cursive;
+    background: linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);
+    color:#0b0c0f;
+  }
+  header{
+    padding:12px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    border-bottom-left-radius:12px;
+    border-bottom-right-radius:12px;
+  }
+  button{
+    padding:6px 14px;
+    border:none;
+    border-radius:16px;
+    background: linear-gradient(135deg,#24c77b,#6be6ff);
+    color:#0b0c0f;
+    font-weight:bold;
+    cursor:pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  button:hover{
+    transform: scale(1.1);
+    box-shadow:0 6px 12px rgba(0,0,0,0.3);
+  }
+  .screen{
+    display:none;
+    height:calc(100vh - 64px);
+    overflow:auto;
+    padding:16px;
+  }
   .active{display:block;}
-  .page{background:#0b0c0f;padding:8px;margin:8px 0;border-radius:6px;border:1px solid #222;}
-  .page-title{font-weight:bold;margin:0;}
-  .page-content{margin:4px 0;}
-  .small{font-size:12px;color:#9aa3b2;}
-  textarea, input{width:100%;margin:4px 0;padding:6px;background:#0f1115;border:1px solid #222;color:#e6eef7;border-radius:4px;font-family:monospace;}
-  .fullscreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#0f1115;color:#e6eef7;z-index:1000;overflow:auto;padding:12px;display:none;flex-direction:column;}
-  .fullscreen button{align-self:flex-end;}
-  #debugLog{position:fixed;bottom:0;left:0;width:100%;max-height:120px;overflow:auto;background:#222;color:#fff;font-size:12px;padding:4px;z-index:999;}
+  .page{
+    background: rgba(255,255,255,0.9);
+    padding:12px;
+    margin:12px 0;
+    border-radius:20px;
+    border:2px solid #ff7eb9;
+    box-shadow:0 6px 12px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
+  }
+  .page:hover{transform: translateY(-4px);}
+  .page-title{
+    font-weight:bold;
+    margin:0 0 4px 0;
+    font-size:1.2em;
+    color:#ff6f91;
+  }
+  .page-content{margin:4px 0;line-height:1.4;}
+  .small{font-size:12px;color:#555;text-align:right;}
+  textarea,input{
+    width:100%;
+    margin:6px 0;
+    padding:8px;
+    background: rgba(255,255,255,0.7);
+    border:2px solid #24c77b;
+    border-radius:12px;
+    color:#0b0c0f;
+    font-family:'Comic Neue', cursive;
+    font-size:14px;
+    transition: border-color 0.2s;
+  }
+  textarea:focus,input:focus{border-color:#ff6f91;outline:none;}
+  .fullscreen{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background: linear-gradient(135deg,#fad0c4,#fbc2eb,#a18cd1);
+    z-index:1000;
+    overflow:auto;
+    padding:24px;
+    display:none;
+    flex-direction:column;
+    color:#0b0c0f;
+    font-size:16px;
+  }
+  .fullscreen button{align-self:flex-end;background:#ff6f91;color:#fff;}
+  #debugLog{
+    position:fixed;
+    bottom:0;
+    left:0;
+    width:100%;
+    max-height:120px;
+    overflow:auto;
+    background:rgba(0,0,0,0.5);
+    color:#fff;
+    font-size:12px;
+    padding:4px;
+    z-index:999;
+    border-top-left-radius:12px;
+    border-top-right-radius:12px;
+  }
+  .comment{
+    background:#f0f0f0;
+    border-radius:8px;
+    padding:6px;
+    margin:4px 0;
+  }
+  .comment-author{font-weight:bold;color:#ff6f91;margin-right:4px;}
 </style>
 </head>
 <body>
@@ -30,7 +127,6 @@
   </div>
 </header>
 
-<!-- Screens -->
 <div id="feedScreen" class="screen active">
   <h2>Feed</h2>
   <div id="feedList"></div>
@@ -43,109 +139,121 @@
   <button id="createBtn">Create Page</button>
 </div>
 
-<!-- Fullscreen View -->
 <div class="fullscreen" id="fullscreenView">
-  <button id="closeFullscreen">Back to Feed</button>
+  <button id="closeFullscreen">🔙 Back</button>
   <div id="fullscreenContent"></div>
+  <h3>Comments</h3>
+  <div id="commentList"></div>
+  <input type="text" id="commentAuthor" placeholder="Your name">
+  <textarea id="commentText" rows="3" placeholder="Add a comment"></textarea>
+  <button id="addCommentBtn">Add Comment</button>
 </div>
 
-<!-- Debug log -->
 <div id="debugLog"></div>
 
-<!-- Supabase UMD -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
-
 <script>
-  const SUPABASE_URL = 'https://jzeoinetgtxfrulujraa.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZW9pbmV0Z3R4ZnJ1bHVqcmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MTcxNzAsImV4cCI6MjA4MDk5MzE3MH0.Z0By2zuzpCWqNbH0YIT0vliseXFe1LlRSHsT2dSu4Hs';
-  const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const SUPABASE_URL = 'https://jzeoinetgtxfrulujraa.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZW9pbmV0Z3R4ZnJ1bHVqcmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MTcxNzAsImV4cCI6MjA4MDk5MzE3MH0.Z0By2zuzpCWqNbH0YIT0vliseXFe1LlRSHsT2dSu4Hs';
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  const log = (msg) => {
-    console.log(msg);
-    const dbg = document.getElementById('debugLog');
-    dbg.innerHTML += msg + '<br>';
-    dbg.scrollTop = dbg.scrollHeight;
-  };
+const log = msg => {console.log(msg); const dbg=document.getElementById('debugLog'); dbg.innerHTML+=msg+'<br>'; dbg.scrollTop=dbg.scrollHeight;}
 
-  const homeBtn = document.getElementById('homeBtn');
-  const editorBtn = document.getElementById('editorBtn');
-  const feedScreen = document.getElementById('feedScreen');
-  const editorScreen = document.getElementById('editorScreen');
-  const feedList = document.getElementById('feedList');
-  const titleInput = document.getElementById('title');
-  const htmlContent = document.getElementById('htmlContent');
-  const createBtn = document.getElementById('createBtn');
-  const fullscreenView = document.getElementById('fullscreenView');
-  const fullscreenContent = document.getElementById('fullscreenContent');
-  const closeFullscreen = document.getElementById('closeFullscreen');
+const homeBtn=document.getElementById('homeBtn');
+const editorBtn=document.getElementById('editorBtn');
+const feedScreen=document.getElementById('feedScreen');
+const editorScreen=document.getElementById('editorScreen');
+const feedList=document.getElementById('feedList');
+const titleInput=document.getElementById('title');
+const htmlContent=document.getElementById('htmlContent');
+const createBtn=document.getElementById('createBtn');
+const fullscreenView=document.getElementById('fullscreenView');
+const fullscreenContent=document.getElementById('fullscreenContent');
+const closeFullscreen=document.getElementById('closeFullscreen');
+const commentList=document.getElementById('commentList');
+const commentAuthor=document.getElementById('commentAuthor');
+const commentText=document.getElementById('commentText');
+const addCommentBtn=document.getElementById('addCommentBtn');
 
-  // Screen switching
-  homeBtn.onclick = ()=>{ feedScreen.classList.add('active'); editorScreen.classList.remove('active'); };
-  editorBtn.onclick = ()=>{ feedScreen.classList.remove('active'); editorScreen.classList.add('active'); };
+let currentPageId=null;
 
-  // Load feed
-  async function loadFeed(){
-    log('Loading feed...');
-    const { data, error } = await supabaseClient.from('pages').select('*').order('created_at',{ascending:false});
-    if(error){ log('Supabase Error: ' + error.message); return; }
-    feedList.innerHTML = '';
-    data.forEach(page=>{
-      const div = document.createElement('div');
-      div.className = 'page';
-      div.innerHTML = `
-        <p class="page-title">${page.title||'Untitled'}</p>
-        <div class="page-content">${page.content?.html||''}</div>
-        <div style="display:flex;gap:4px;margin-top:4px;">
-          <button class="viewBtn">View</button>
-          <button class="remixBtn">Remix</button>
-          <button class="likeBtn">Like (${page.likes||0})</button>
-        </div>
-        <p class="small">${new Date(page.created_at).toLocaleString()}</p>
-      `;
-      // View button
-      div.querySelector('.viewBtn').onclick = ()=>{
-        fullscreenContent.innerHTML = `<h2>${page.title}</h2>${page.content?.html||''}`;
-        fullscreenView.style.display = 'flex';
-      };
-      // Remix button
-      div.querySelector('.remixBtn').onclick = ()=>{
-        editorBtn.click();
-        titleInput.value = page.title + ' (Remix)';
-        htmlContent.value = page.content?.html||'';
-      };
-      // Like button
-      div.querySelector('.likeBtn').onclick = async ()=>{
-        const { error } = await supabaseClient.from('pages').update({likes: (page.likes||0)+1}).eq('id', page.id);
-        if(error){ log('Supabase Like Error: ' + error.message); return; }
-        loadFeed();
-      };
-      feedList.appendChild(div);
-    });
-    log('Feed loaded.');
-  }
+homeBtn.onclick=()=>{ feedScreen.classList.add('active'); editorScreen.classList.remove('active'); fullscreenView.style.display='none'; };
+editorBtn.onclick=()=>{ feedScreen.classList.remove('active'); editorScreen.classList.add('active'); fullscreenView.style.display='none'; };
 
-  // Close fullscreen
-  closeFullscreen.onclick = ()=>{ fullscreenView.style.display='none'; };
+async function loadFeed(){
+  log('Loading feed...');
+  const { data, error } = await supabaseClient.from('pages').select('*').order('created_at',{ascending:false});
+  if(error){ log('Supabase Error: ' + error.message); return; }
+  feedList.innerHTML='';
+  data.forEach(page=>{
+    const div=document.createElement('div');
+    div.className='page';
+    div.innerHTML=`
+      <p class="page-title">${page.title||'Untitled'}</p>
+      <div class="page-content">${page.content?.html||''}</div>
+      <div style="display:flex;gap:6px;margin-top:6px;">
+        <button class="viewBtn">👁 View</button>
+        <button class="remixBtn">🔁 Remix</button>
+        <button class="likeBtn">❤️ (${page.likes||0})</button>
+      </div>
+      <p class="small">${new Date(page.created_at).toLocaleString()}</p>
+    `;
+    div.querySelector('.viewBtn').onclick=()=>{ showPage(page.id,page.title,page.content?.html||''); };
+    div.querySelector('.remixBtn').onclick=()=>{ editorBtn.click(); titleInput.value=page.title+' (Remix)'; htmlContent.value=page.content?.html||''; };
+    div.querySelector('.likeBtn').onclick=async ()=>{
+      const { data:updated, error } = await supabaseClient.from('pages').update({likes:(page.likes||0)+1}).eq('id',page.id).select();
+      if(error){ log('Like Error: '+error.message); return; }
+      loadFeed();
+    };
+    feedList.appendChild(div);
+  });
+  log('Feed loaded.');
+}
 
-  // Create page
-  createBtn.onclick = async ()=>{
-    log('Create button pressed');
-    if(!titleInput.value){ alert('Enter a title'); return; }
-    if(!htmlContent.value){ alert('Enter HTML content'); return; }
-    const { data, error } = await supabaseClient.from('pages').insert([{
-      title: titleInput.value,
-      content: { html: htmlContent.value },
-      likes:0
-    }]);
-    log('Insert result: ' + JSON.stringify({data, error}));
-    if(error){ alert('Supabase Create Error: ' + error.message); return; }
-    titleInput.value='';
-    htmlContent.value='';
-    homeBtn.click();
-    loadFeed();
-  };
+function showPage(id,title,html){
+  currentPageId=id;
+  fullscreenContent.innerHTML=`<h2>${title}</h2>${html}`;
+  commentList.innerHTML='';
+  loadComments(id);
+  fullscreenView.style.display='flex';
+}
 
+async function loadComments(pageId){
+  const { data, error } = await supabaseClient.from('comments').select('*').eq('page_id',pageId).order('created_at',{ascending:true});
+  if(error){ log('Load comments error: '+error.message); return; }
+  commentList.innerHTML='';
+  data.forEach(c=>{
+    const div=document.createElement('div');
+    div.className='comment';
+    div.innerHTML=`<span class="comment-author">${c.author||'Anon'}:</span>${c.content}`;
+    commentList.appendChild(div);
+  });
+}
+
+addCommentBtn.onclick=async ()=>{
+  if(!currentPageId){ alert('No page selected'); return; }
+  if(!commentAuthor.value||!commentText.value){ alert('Enter name and comment'); return; }
+  const { error } = await supabaseClient.from('comments').insert([{page_id:currentPageId, author:commentAuthor.value, content:commentText.value}]);
+  if(error){ alert('Comment Error: '+error.message); return; }
+  commentAuthor.value=''; commentText.value='';
+  loadComments(currentPageId);
+};
+
+closeFullscreen.onclick=()=>{ fullscreenView.style.display='none'; };
+
+createBtn.onclick=async ()=>{
+  log('Create pressed');
+  if(!titleInput.value){ alert('Enter a title'); return; }
+  if(!htmlContent.value){ alert('Enter HTML content'); return; }
+  const { data, error } = await supabaseClient.from('pages').insert([{title:titleInput.value, content:{html:htmlContent.value}, likes:0}]);
+  log('Insert result: '+JSON.stringify({data,error}));
+  if(error){ alert('Create Error: '+error.message); return; }
+  titleInput.value=''; htmlContent.value='';
+  homeBtn.click();
   loadFeed();
+};
+
+loadFeed();
 </script>
 </body>
 </html>
