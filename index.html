@@ -3,140 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MicroPages — Feed & Comments</title>
+<title>MicroPages — TikTok Feed</title>
 
-<!-- Playful font -->
 <link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
   body{
     margin:0;
     font-family:'Comic Neue', cursive;
-    background: linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);
-    color:#0b0c0f;
+    background:black;
+    color:white;
+    overflow-x:hidden;
   }
+
   header{
-    padding:12px;
+    position:fixed;
+    top:0;
+    width:100%;
+    height:50px;
+    background:rgba(0,0,0,0.85);
     display:flex;
     justify-content:space-between;
     align-items:center;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    border-bottom-left-radius:12px;
-    border-bottom-right-radius:12px;
+    padding:0 12px;
+    z-index:10;
+    box-shadow:0 2px 10px rgba(0,0,0,0.7);
   }
+
+  header h1{
+    font-size:1.2em;
+    color:#ff3d91;
+    text-shadow: 1px 1px 4px #000;
+  }
+
   button{
-    padding:6px 14px;
     border:none;
-    border-radius:16px;
-    background: linear-gradient(135deg,#24c77b,#6be6ff);
-    color:#0b0c0f;
+    border-radius:50px;
+    padding:8px 16px;
+    background:rgba(255,255,255,0.15);
+    color:white;
     font-weight:bold;
     cursor:pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
+    transition: 0.2s;
+    text-shadow:0 0 2px #000;
   }
+
   button:hover{
-    transform: scale(1.1);
-    box-shadow:0 6px 12px rgba(0,0,0,0.3);
+    background:rgba(255,255,255,0.3);
   }
-  .screen{
-    display:none;
-    height:calc(100vh - 64px);
-    overflow:auto;
-    padding:16px;
-  }
+
+  .screen{display:none;height:100vh;width:100vw;overflow:hidden;}
   .active{display:block;}
-  .page{
-    background: rgba(255,255,255,0.9);
-    padding:12px;
-    margin:12px 0;
-    border-radius:20px;
-    border:2px solid #ff7eb9;
-    box-shadow:0 6px 12px rgba(0,0,0,0.15);
-    transition: transform 0.2s;
+
+  #feedList{
+    scroll-snap-type: y mandatory;
+    overflow-y:scroll;
+    height:100vh;
   }
-  .page:hover{transform: translateY(-4px);}
+
+  .page{
+    scroll-snap-align: start;
+    height:100vh;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    padding:20px;
+    box-sizing:border-box;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent), #111;
+    position:relative;
+  }
+
   .page-title{
     font-weight:bold;
-    margin:0 0 4px 0;
+    font-size:2em;
+    margin-bottom:12px;
+    color:#ff3d91;
+    text-shadow:1px 1px 4px #000;
+  }
+
+  .page-content{
+    font-size:1.5em;
+    margin-bottom:60px;
+  }
+
+  .actions{
+    position:absolute;
+    right:12px;
+    bottom:80px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    align-items:center;
+  }
+
+  .actions button{
+    width:60px;
+    height:60px;
+    border-radius:50%;
+    display:flex;
+    justify-content:center;
+    align-items:center;
     font-size:1.2em;
-    color:#ff6f91;
+    background:rgba(255,255,255,0.1);
+    color:white;
+    border:none;
+    text-shadow:0 0 4px #000;
   }
-  .page-content{margin:4px 0;line-height:1.4;}
-  .small{font-size:12px;color:#555;text-align:right;}
-  textarea,input{
-    width:100%;
-    margin:6px 0;
-    padding:8px;
-    background: rgba(255,255,255,0.7);
-    border:2px solid #24c77b;
-    border-radius:12px;
-    color:#0b0c0f;
-    font-family:'Comic Neue', cursive;
-    font-size:14px;
-    transition: border-color 0.2s;
-  }
-  textarea:focus,input:focus{border-color:#ff6f91;outline:none;}
+
   .fullscreen{
     position:fixed;
     top:0;
     left:0;
     width:100%;
     height:100%;
-    background: linear-gradient(135deg,#fad0c4,#fbc2eb,#a18cd1);
+    background:black;
     z-index:1000;
     overflow:auto;
     padding:24px;
     display:none;
     flex-direction:column;
-    color:#0b0c0f;
+    color:white;
     font-size:16px;
   }
-  .fullscreen button{align-self:flex-end;background:#ff6f91;color:#fff;}
-  #debugLog{
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    max-height:120px;
-    overflow:auto;
-    background:rgba(0,0,0,0.5);
-    color:#fff;
-    font-size:12px;
-    padding:4px;
-    z-index:999;
-    border-top-left-radius:12px;
-    border-top-right-radius:12px;
-  }
+
+  .fullscreen button{align-self:flex-end;background:#ff3d91;color:#fff;}
+  #commentList{margin-top:16px;}
   .comment{
-    background:#f0f0f0;
-    border-radius:8px;
+    margin-bottom:8px;
+    background:rgba(255,255,255,0.1);
     padding:6px;
-    margin:4px 0;
+    border-radius:8px;
   }
-  .comment-author{font-weight:bold;color:#ff6f91;margin-right:4px;}
+  .comment-author{
+    font-weight:bold;
+    color:#ff3d91;
+    margin-right:4px;
+  }
+
+  input, textarea{
+    width:100%;
+    margin:6px 0;
+    padding:8px;
+    background: rgba(255,255,255,0.1);
+    border:1px solid #ff3d91;
+    border-radius:12px;
+    color:white;
+    font-family:'Comic Neue', cursive;
+    font-size:14px;
+  }
+
+  input:focus, textarea:focus{
+    outline:none;
+    border-color:#ff6ea1;
+  }
+
 </style>
 </head>
 <body>
 
 <header>
-  <h1>MicroPages</h1>
+  <h1>🎨 MicroPages</h1>
   <div>
-    <button id="homeBtn">Home</button>
-    <button id="editorBtn">Create Page</button>
+    <button id="editorBtn">✏️ Create</button>
   </div>
 </header>
 
 <div id="feedScreen" class="screen active">
-  <h2>Feed</h2>
   <div id="feedList"></div>
 </div>
 
 <div id="editorScreen" class="screen">
-  <h2>Create Page</h2>
-  <input type="text" id="title" placeholder="Page Title">
-  <textarea id="htmlContent" rows="12" placeholder="Enter HTML here"></textarea>
-  <button id="createBtn">Create Page</button>
+  <h2 style="padding:16px;">Create Page</h2>
+  <input type="text" id="title" placeholder="Title" style="margin:16px;">
+  <textarea id="htmlContent" rows="12" placeholder="Enter HTML here" style="margin:16px;"></textarea>
+  <button id="createBtn" style="margin:16px;">Create</button>
 </div>
 
 <div class="fullscreen" id="fullscreenView">
@@ -149,17 +190,12 @@
   <button id="addCommentBtn">Add Comment</button>
 </div>
 
-<div id="debugLog"></div>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 <script>
 const SUPABASE_URL = 'https://jzeoinetgtxfrulujraa.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZW9pbmV0Z3R4ZnJ1bHVqcmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MTcxNzAsImV4cCI6MjA4MDk5MzE3MH0.Z0By2zuzpCWqNbH0YIT0vliseXFe1LlRSHsT2dSu4Hs';
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const log = msg => {console.log(msg); const dbg=document.getElementById('debugLog'); dbg.innerHTML+=msg+'<br>'; dbg.scrollTop=dbg.scrollHeight;}
-
-const homeBtn=document.getElementById('homeBtn');
 const editorBtn=document.getElementById('editorBtn');
 const feedScreen=document.getElementById('feedScreen');
 const editorScreen=document.getElementById('editorScreen');
@@ -177,13 +213,12 @@ const addCommentBtn=document.getElementById('addCommentBtn');
 
 let currentPageId=null;
 
-homeBtn.onclick=()=>{ feedScreen.classList.add('active'); editorScreen.classList.remove('active'); fullscreenView.style.display='none'; };
-editorBtn.onclick=()=>{ feedScreen.classList.remove('active'); editorScreen.classList.add('active'); fullscreenView.style.display='none'; };
+editorBtn.onclick=()=>{ feedScreen.classList.remove('active'); editorScreen.classList.add('active'); };
+function showFeed(){ feedScreen.classList.add('active'); editorScreen.classList.remove('active'); fullscreenView.style.display='none'; }
 
 async function loadFeed(){
-  log('Loading feed...');
   const { data, error } = await supabaseClient.from('pages').select('*').order('created_at',{ascending:false});
-  if(error){ log('Supabase Error: ' + error.message); return; }
+  if(error){ console.log(error); return; }
   feedList.innerHTML='';
   data.forEach(page=>{
     const div=document.createElement('div');
@@ -191,23 +226,18 @@ async function loadFeed(){
     div.innerHTML=`
       <p class="page-title">${page.title||'Untitled'}</p>
       <div class="page-content">${page.content?.html||''}</div>
-      <div style="display:flex;gap:6px;margin-top:6px;">
-        <button class="viewBtn">👁 View</button>
-        <button class="remixBtn">🔁 Remix</button>
-        <button class="likeBtn">❤️ (${page.likes||0})</button>
+      <div class="actions">
+        <button class="likeBtn">❤️ ${page.likes||0}</button>
+        <button class="viewBtn">👁</button>
       </div>
-      <p class="small">${new Date(page.created_at).toLocaleString()}</p>
     `;
     div.querySelector('.viewBtn').onclick=()=>{ showPage(page.id,page.title,page.content?.html||''); };
-    div.querySelector('.remixBtn').onclick=()=>{ editorBtn.click(); titleInput.value=page.title+' (Remix)'; htmlContent.value=page.content?.html||''; };
     div.querySelector('.likeBtn').onclick=async ()=>{
-      const { data:updated, error } = await supabaseClient.from('pages').update({likes:(page.likes||0)+1}).eq('id',page.id).select();
-      if(error){ log('Like Error: '+error.message); return; }
+      await supabaseClient.from('pages').update({likes:(page.likes||0)+1}).eq('id',page.id);
       loadFeed();
     };
     feedList.appendChild(div);
   });
-  log('Feed loaded.');
 }
 
 function showPage(id,title,html){
@@ -219,8 +249,7 @@ function showPage(id,title,html){
 }
 
 async function loadComments(pageId){
-  const { data, error } = await supabaseClient.from('comments').select('*').eq('page_id',pageId).order('created_at',{ascending:true});
-  if(error){ log('Load comments error: '+error.message); return; }
+  const { data } = await supabaseClient.from('comments').select('*').eq('page_id',pageId).order('created_at',{ascending:true});
   commentList.innerHTML='';
   data.forEach(c=>{
     const div=document.createElement('div');
@@ -231,25 +260,20 @@ async function loadComments(pageId){
 }
 
 addCommentBtn.onclick=async ()=>{
-  if(!currentPageId){ alert('No page selected'); return; }
-  if(!commentAuthor.value||!commentText.value){ alert('Enter name and comment'); return; }
-  const { error } = await supabaseClient.from('comments').insert([{page_id:currentPageId, author:commentAuthor.value, content:commentText.value}]);
-  if(error){ alert('Comment Error: '+error.message); return; }
+  if(!currentPageId) return;
+  if(!commentAuthor.value||!commentText.value) return;
+  await supabaseClient.from('comments').insert([{page_id:currentPageId,author:commentAuthor.value,content:commentText.value}]);
   commentAuthor.value=''; commentText.value='';
   loadComments(currentPageId);
 };
 
-closeFullscreen.onclick=()=>{ fullscreenView.style.display='none'; };
+closeFullscreen.onclick=()=>{ fullscreenView.style.display='none'; showFeed(); };
 
 createBtn.onclick=async ()=>{
-  log('Create pressed');
-  if(!titleInput.value){ alert('Enter a title'); return; }
-  if(!htmlContent.value){ alert('Enter HTML content'); return; }
-  const { data, error } = await supabaseClient.from('pages').insert([{title:titleInput.value, content:{html:htmlContent.value}, likes:0}]);
-  log('Insert result: '+JSON.stringify({data,error}));
-  if(error){ alert('Create Error: '+error.message); return; }
+  if(!titleInput.value||!htmlContent.value) return;
+  await supabaseClient.from('pages').insert([{title:titleInput.value,content:{html:htmlContent.value},likes:0}]);
   titleInput.value=''; htmlContent.value='';
-  homeBtn.click();
+  showFeed();
   loadFeed();
 };
 
