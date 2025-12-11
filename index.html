@@ -3,160 +3,177 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MicroPages — TikTok Feed</title>
+<title>MicroPages — Fun Feed</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Comic+Neue:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
 
 <style>
-  body{
-    margin:0;
-    font-family:'Comic Neue', cursive;
-    background:black;
-    color:white;
-    overflow-x:hidden;
-  }
+body {
+  margin:0;
+  font-family:'Comic Neue', cursive;
+  background:#111;
+  color:white;
+  overflow-x:hidden;
+}
 
-  header{
-    position:fixed;
-    top:0;
-    width:100%;
-    height:50px;
-    background:rgba(0,0,0,0.85);
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:0 12px;
-    z-index:10;
-    box-shadow:0 2px 10px rgba(0,0,0,0.7);
-  }
+header {
+  position:fixed;
+  top:0;
+  width:100%;
+  height:60px;
+  background:#222;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 16px;
+  z-index:10;
+  box-shadow:0 2px 10px rgba(0,0,0,0.5);
+  border-bottom:2px solid #ff6ea1;
+}
 
-  header h1{
-    font-size:1.2em;
-    color:#ff3d91;
-    text-shadow: 1px 1px 4px #000;
-  }
+header h1 {
+  font-family:'Press Start 2P', cursive;
+  font-size:1.1em;
+  color:#ff6ea1;
+}
 
-  button{
-    border:none;
-    border-radius:50px;
-    padding:8px 16px;
-    background:rgba(255,255,255,0.15);
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-    transition: 0.2s;
-    text-shadow:0 0 2px #000;
-  }
+button {
+  border:none;
+  border-radius:50px;
+  padding:6px 14px;
+  background:#ff6ea1;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.2s;
+}
 
-  button:hover{
-    background:rgba(255,255,255,0.3);
-  }
+button:hover {
+  background:#ff3d91;
+}
 
-  .screen{display:none;height:100vh;width:100vw;overflow:hidden;}
-  .active{display:block;}
+.screen {
+  display:none;
+  min-height:100vh;
+  width:100vw;
+  overflow:auto;
+  padding-top:70px; /* account for header */
+  box-sizing:border-box;
+}
 
-  #feedList{
-    scroll-snap-type: y mandatory;
-    overflow-y:scroll;
-    height:100vh;
-  }
+.active {
+  display:block;
+}
 
-  .page{
-    scroll-snap-align: start;
-    height:100vh;
-    width:100%;
-    display:flex;
-    flex-direction:column;
-    justify-content:flex-end;
-    padding:20px;
-    box-sizing:border-box;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent), #111;
-    position:relative;
-  }
+#feedList {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:20px;
+  padding-bottom:20px;
+}
 
-  .page-title{
-    font-weight:bold;
-    font-size:2em;
-    margin-bottom:12px;
-    color:#ff3d91;
-    text-shadow:1px 1px 4px #000;
-  }
+.page {
+  width:90%;
+  max-width:500px;
+  background:linear-gradient(135deg, #222, #333);
+  border-radius:16px;
+  padding:20px;
+  box-sizing:border-box;
+  position:relative;
+  box-shadow:0 4px 12px rgba(0,0,0,0.5);
+  transition: transform 0.2s;
+}
 
-  .page-content{
-    font-size:1.5em;
-    margin-bottom:60px;
-  }
+.page:hover {
+  transform:translateY(-4px);
+}
 
-  .actions{
-    position:absolute;
-    right:12px;
-    bottom:80px;
-    display:flex;
-    flex-direction:column;
-    gap:16px;
-    align-items:center;
-  }
+.page-title {
+  font-weight:bold;
+  font-size:1.5em;
+  margin-bottom:12px;
+  color:#ff6ea1;
+}
 
-  .actions button{
-    width:60px;
-    height:60px;
-    border-radius:50%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:1.2em;
-    background:rgba(255,255,255,0.1);
-    color:white;
-    border:none;
-    text-shadow:0 0 4px #000;
-  }
+.page-content {
+  font-size:1.1em;
+  line-height:1.5;
+  margin-bottom:50px;
+}
 
-  .fullscreen{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:black;
-    z-index:1000;
-    overflow:auto;
-    padding:24px;
-    display:none;
-    flex-direction:column;
-    color:white;
-    font-size:16px;
-  }
+.actions {
+  position:absolute;
+  right:16px;
+  bottom:16px;
+  display:flex;
+  gap:10px;
+}
 
-  .fullscreen button{align-self:flex-end;background:#ff3d91;color:#fff;}
-  #commentList{margin-top:16px;}
-  .comment{
-    margin-bottom:8px;
-    background:rgba(255,255,255,0.1);
-    padding:6px;
-    border-radius:8px;
-  }
-  .comment-author{
-    font-weight:bold;
-    color:#ff3d91;
-    margin-right:4px;
-  }
+.actions button {
+  width:auto;
+  height:auto;
+  padding:6px 10px;
+  border-radius:12px;
+  font-size:1em;
+}
 
-  input, textarea{
-    width:100%;
-    margin:6px 0;
-    padding:8px;
-    background: rgba(255,255,255,0.1);
-    border:1px solid #ff3d91;
-    border-radius:12px;
-    color:white;
-    font-family:'Comic Neue', cursive;
-    font-size:14px;
-  }
+.fullscreen {
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:#111;
+  z-index:1000;
+  overflow:auto;
+  padding:24px;
+  display:none;
+  flex-direction:column;
+  color:white;
+  font-size:16px;
+}
 
-  input:focus, textarea:focus{
-    outline:none;
-    border-color:#ff6ea1;
-  }
+.fullscreen button {
+  align-self:flex-end;
+  background:#ff6ea1;
+  color:#fff;
+  margin-bottom:10px;
+}
+
+#commentList {
+  margin-top:16px;
+}
+
+.comment {
+  margin-bottom:8px;
+  background:rgba(255,255,255,0.1);
+  padding:6px;
+  border-radius:8px;
+}
+
+.comment-author {
+  font-weight:bold;
+  color:#ff6ea1;
+  margin-right:4px;
+}
+
+input, textarea {
+  width:100%;
+  margin:6px 0;
+  padding:8px;
+  background: rgba(255,255,255,0.1);
+  border:1px solid #ff6ea1;
+  border-radius:12px;
+  color:white;
+  font-family:'Comic Neue', cursive;
+  font-size:14px;
+}
+
+input:focus, textarea:focus {
+  outline:none;
+  border-color:#ff3d91;
+}
 
 </style>
 </head>
@@ -175,9 +192,10 @@
 
 <div id="editorScreen" class="screen">
   <h2 style="padding:16px;">Create Page</h2>
-  <input type="text" id="title" placeholder="Title" style="margin:16px;">
-  <textarea id="htmlContent" rows="12" placeholder="Enter HTML here" style="margin:16px;"></textarea>
-  <button id="createBtn" style="margin:16px;">Create</button>
+  <input type="text" id="title" placeholder="Title">
+  <textarea id="htmlContent" rows="12" placeholder="Enter HTML + optional &lt;style&gt; here"></textarea>
+  <button id="createBtn">Create</button>
+  <p style="color:#ccc;font-size:12px;">You can add custom styles by including &lt;style&gt; tags inside your HTML content.</p>
 </div>
 
 <div class="fullscreen" id="fullscreenView">
@@ -216,11 +234,20 @@ let currentPageId=null;
 editorBtn.onclick=()=>{ feedScreen.classList.remove('active'); editorScreen.classList.add('active'); };
 function showFeed(){ feedScreen.classList.add('active'); editorScreen.classList.remove('active'); fullscreenView.style.display='none'; }
 
+function shuffleArray(array){
+  for(let i=array.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [array[i],array[j]]=[array[j],array[i]];
+  }
+  return array;
+}
+
 async function loadFeed(){
-  const { data, error } = await supabaseClient.from('pages').select('*').order('created_at',{ascending:false});
+  const { data, error } = await supabaseClient.from('pages').select('*');
   if(error){ console.log(error); return; }
   feedList.innerHTML='';
-  data.forEach(page=>{
+  const shuffled = shuffleArray(data);
+  shuffled.forEach(page=>{
     const div=document.createElement('div');
     div.className='page';
     div.innerHTML=`
