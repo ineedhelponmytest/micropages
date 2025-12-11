@@ -48,94 +48,91 @@
   <div id="fullscreenContent"></div>
 </div>
 
-<script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+<!-- Supabase UMD -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js/dist/umd/supabase.min.js"></script>
 
-// ← REPLACE WITH YOUR SUPABASE INFO
-const SUPABASE_URL = 'https://jzeoinetgtxfrulujraa.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZW9pbmV0Z3R4ZnJ1bHVqcmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MTcxNzAsImV4cCI6MjA4MDk5MzE3MH0.Z0By2zuzpCWqNbH0YIT0vliseXFe1LlRSHsT2dSu4Hs';
+<script>
+  const SUPABASE_URL = 'https://jzeoinetgtxfrulujraa.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6ZW9pbmV0Z3R4ZnJ1bHVqcmFhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU0MTcxNzAsImV4cCI6MjA4MDk5MzE3MH0.Z0By2zuzpCWqNbH0YIT0vliseXFe1LlRSHsT2dSu4Hs';
+  const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // DOM Elements
+  const homeBtn = document.getElementById('homeBtn');
+  const editorBtn = document.getElementById('editorBtn');
+  const feedScreen = document.getElementById('feedScreen');
+  const editorScreen = document.getElementById('editorScreen');
+  const feedList = document.getElementById('feedList');
+  const titleInput = document.getElementById('title');
+  const htmlContent = document.getElementById('htmlContent');
+  const createBtn = document.getElementById('createBtn');
+  const fullscreenView = document.getElementById('fullscreenView');
+  const fullscreenContent = document.getElementById('fullscreenContent');
+  const closeFullscreen = document.getElementById('closeFullscreen');
 
-// DOM Elements
-const homeBtn = document.getElementById('homeBtn');
-const editorBtn = document.getElementById('editorBtn');
-const feedScreen = document.getElementById('feedScreen');
-const editorScreen = document.getElementById('editorScreen');
-const feedList = document.getElementById('feedList');
-const titleInput = document.getElementById('title');
-const htmlContent = document.getElementById('htmlContent');
-const createBtn = document.getElementById('createBtn');
-const fullscreenView = document.getElementById('fullscreenView');
-const fullscreenContent = document.getElementById('fullscreenContent');
-const closeFullscreen = document.getElementById('closeFullscreen');
+  // Screen switching
+  homeBtn.onclick = ()=>{ feedScreen.classList.add('active'); editorScreen.classList.remove('active'); };
+  editorBtn.onclick = ()=>{ feedScreen.classList.remove('active'); editorScreen.classList.add('active'); };
 
-// Screen switching
-homeBtn.onclick = ()=>{ feedScreen.classList.add('active'); editorScreen.classList.remove('active'); };
-editorBtn.onclick = ()=>{ feedScreen.classList.remove('active'); editorScreen.classList.add('active'); };
+  // Load feed
+  async function loadFeed(){
+    const { data, error } = await supabase.from('pages').select('*').order('created_at',{ascending:false});
+    if(error){ console.error('Supabase Error:', error); return; }
+    feedList.innerHTML = '';
+    data.forEach(page=>{
+      const div = document.createElement('div');
+      div.className = 'page';
+      div.innerHTML = `
+        <p class="page-title">${page.title||'Untitled'}</p>
+        <div class="page-content">${page.content?.html||''}</div>
+        <div style="display:flex;gap:4px;margin-top:4px;">
+          <button class="viewBtn">View</button>
+          <button class="remixBtn">Remix</button>
+          <button class="likeBtn">Like (${page.likes||0})</button>
+        </div>
+        <p class="small">${new Date(page.created_at).toLocaleString()}</p>
+      `;
+      // View button
+      div.querySelector('.viewBtn').onclick = ()=>{
+        fullscreenContent.innerHTML = `<h2>${page.title}</h2>${page.content?.html||''}`;
+        fullscreenView.style.display = 'flex';
+      };
+      // Remix button
+      div.querySelector('.remixBtn').onclick = ()=>{
+        editorBtn.click();
+        titleInput.value = page.title + ' (Remix)';
+        htmlContent.value = page.content?.html||'';
+      };
+      // Like button
+      div.querySelector('.likeBtn').onclick = async ()=>{
+        const { error } = await supabase.from('pages').update({likes: (page.likes||0)+1}).eq('id', page.id);
+        if(error){ console.error('Supabase Like Error:', error); return; }
+        loadFeed();
+      };
+      feedList.appendChild(div);
+    });
+  }
 
-// Load feed
-async function loadFeed(){
-  const { data, error } = await supabase.from('pages').select('*').order('created_at',{ascending:false});
-  if(error){ console.error(error); return; }
-  feedList.innerHTML = '';
-  data.forEach(page=>{
-    const div = document.createElement('div');
-    div.className = 'page';
-    div.innerHTML = `
-      <p class="page-title">${page.title||'Untitled'}</p>
-      <div class="page-content">${page.content?.html||''}</div>
-      <div style="display:flex;gap:4px;margin-top:4px;">
-        <button class="viewBtn">View</button>
-        <button class="remixBtn">Remix</button>
-        <button class="likeBtn">Like (${page.likes||0})</button>
-      </div>
-      <p class="small">${new Date(page.created_at).toLocaleString()}</p>
-    `;
-    // View button
-    div.querySelector('.viewBtn').onclick = ()=>{
-      fullscreenContent.innerHTML = `<h2>${page.title}</h2>${page.content?.html||''}`;
-      fullscreenView.style.display = 'flex';
-    }
-    // Remix button
-    div.querySelector('.remixBtn').onclick = ()=>{
-      editorBtn.click();
-      titleInput.value = page.title + ' (Remix)';
-      htmlContent.value = page.content?.html||'';
-    }
-    // Like button
-    div.querySelector('.likeBtn').onclick = async ()=>{
-      const { error } = await supabase.from('pages').update({likes: (page.likes||0)+1 }).eq('id', page.id);
-      if(error) console.error(error);
-      else loadFeed();
-    }
-    feedList.appendChild(div);
-  });
-}
+  // Close fullscreen
+  closeFullscreen.onclick = ()=>{ fullscreenView.style.display='none'; };
 
-// Close fullscreen
-closeFullscreen.onclick = ()=>{ fullscreenView.style.display='none'; };
+  // Create page
+  createBtn.onclick = async ()=>{
+    if(!titleInput.value){ alert('Enter a title'); return; }
+    if(!htmlContent.value){ alert('Enter HTML content'); return; }
+    const { data, error } = await supabase.from('pages').insert([{
+      title: titleInput.value,
+      content: { html: htmlContent.value },
+      likes:0
+    }]);
+    if(error){ alert('Supabase Create Error: ' + error.message); return; }
+    titleInput.value='';
+    htmlContent.value='';
+    homeBtn.click();
+    loadFeed();
+  };
 
-// Create page
-createBtn.onclick = async ()=>{
-  if(!titleInput.value){ alert('Enter a title'); return; }
-  if(!htmlContent.value){ alert('Enter HTML content'); return; }
-
-  const { data, error } = await supabase.from('pages').insert([{
-    title: titleInput.value,
-    content: { html: htmlContent.value },
-    likes: 0
-  }]);
-  if(error){ alert(error.message); return; }
-
-  titleInput.value='';
-  htmlContent.value='';
-  homeBtn.click();
+  // Initialize
   loadFeed();
-}
-
-// Initialize
-loadFeed();
 </script>
 </body>
 </html>
